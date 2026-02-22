@@ -4,60 +4,95 @@ Backend REST API for a digital library platform built with Spring Boot.
 
 ---
 
-## Overview
+## 🚀 Overview
 
-YourLight is a backend application designed to manage users and books in a digital library environment.
+YourLight is a secure and scalable backend application designed to manage users and books in a digital library environment.
 
-It implements authentication using JWT and follows a layered architecture pattern.
+The project implements JWT authentication (access & refresh tokens) and follows a layered architecture pattern.
 
 ---
 
-## Technologies
+## 🏗 Architecture
+
+Layered architecture:
+
+- Controller → Handles HTTP requests
+- Service → Business logic
+- Repository → Database access
+- Security → JWT authentication & authorization
+- DTO → Data transfer objects
+
+---
+
+## 🔐 Authentication
+
+- JWT Access Token
+- JWT Refresh Token
+- Stateless authentication
+- Protected endpoints
+- Role-based structure ready
+
+---
+
+## 🛠 Technologies
 
 - Java 17
-- Spring Boot
+- Spring Boot 3
 - Spring Security
-- JWT Authentication
+- Spring Data JPA
 - MySQL
+- JWT (Auth0)
+- Swagger / OpenAPI
 - Maven
+- JUnit & Mockito (Unit Testing)
 
 ---
 
-## Architecture
-
-The project follows a layered architecture:
-
-- **Controller** → Handles HTTP requests  
-- **Service** → Business logic  
-- **Repository** → Database access  
-- **Security** → JWT authentication and authorization  
-
----
-
-## Features
+## 📦 Features
 
 - User registration
-- User authentication (JWT)
-- Protected endpoints
-- Database integration with MySQL
-- Exception handling structure
+- User login
+- Refresh token
+- CRUD operations for books
+- Favorite books
+- Pagination & sorting
+- Global exception handling
+- Unit tests
+- API documentation via Swagger
 
 ---
 
-## How to Run
+## 📄 API Documentation
 
-1. Clone the repository  
-2. Configure your database credentials in application.properties  
-3. Run the project using:
+After running the application:
+http://localhost:8081/swagger-ui/index.html
 
-```bash
-mvn spring-boot:run
-```
 
-Or run the main class in your IDE.
+---
+
+## ⚙️ Running the Project
+
+1. Clone repository
+
+2. Configure database in:
+src/main/resources/application.properties
+
+
+3. Run:
+
+
+Or run the main class from your IDE.
+
+---
+
+## 🧪 Running Tests
+mvnw.cmd test
+
 
 ---
 
 ## Author
 
 Kelton Rodrigues
+
+Backend Developer | Java & Spring Boot
