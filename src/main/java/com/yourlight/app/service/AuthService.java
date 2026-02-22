@@ -29,9 +29,8 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    // REGISTRO + LOGIN AUTOMÁTICO
     @Transactional
-    public String registrar(RegisterRequest req) {
+    public AuthTokens registrar(RegisterRequest req) {
 
         String email = req.getEmail().trim().toLowerCase();
 
@@ -46,13 +45,11 @@ public class AuthService {
 
         usuarioRepo.save(u);
 
-        // retorna token já autenticado
-        return jwtService.gerarToken(u.getEmail());
+        return gerarTokens(u.getEmail());
     }
 
-    // LOGIN
     @Transactional(readOnly = true)
-    public String login(LoginRequest req) {
+    public AuthTokens login(LoginRequest req) {
 
         String email = req.getEmail().trim().toLowerCase();
 
@@ -63,6 +60,25 @@ public class AuthService {
             throw new BadRequestException("Email ou senha inválidos.");
         }
 
-        return jwtService.gerarToken(u.getEmail());
+        return gerarTokens(u.getEmail());
     }
+
+    public AuthTokens refresh(String refreshToken) {
+
+        if (!jwtService.isRefreshToken(refreshToken)) {
+            throw new BadRequestException("Token inválido.");
+        }
+
+        String email = jwtService.validarEExtrairEmail(refreshToken);
+
+        return gerarTokens(email);
+    }
+
+    private AuthTokens gerarTokens(String email) {
+        String accessToken = jwtService.gerarAccessToken(email);
+        String refreshToken = jwtService.gerarRefreshToken(email);
+        return new AuthTokens(accessToken, refreshToken);
+    }
+
+    public record AuthTokens(String accessToken, String refreshToken) {}
 }

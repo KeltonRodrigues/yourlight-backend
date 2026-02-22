@@ -34,17 +34,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            String email = jwtService.validarEExtrairEmail(token);
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Se quiser roles depois, pode buscar do banco.
-                var auth = new UsernamePasswordAuthenticationToken(
-                        email,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            String token = header.substring(7);
+
+            try {
+
+                // NÃO permitir refresh token para autenticar
+                if (jwtService.isRefreshToken(token)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                String email = jwtService.validarEExtrairEmail(token);
+
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+
+            } catch (Exception e) {
+                // Token inválido → não autentica
             }
         }
 

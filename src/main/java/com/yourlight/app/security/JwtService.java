@@ -19,31 +19,48 @@ public class JwtService {
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
     private final String issuer;
-    private final long expirationMinutes;
+    private final long accessExpirationMinutes;
+    private final long refreshExpirationDays;
 
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.issuer}") String issuer,
-            @Value("${app.jwt.expiration-minutes}") long expirationMinutes
+            @Value("${app.jwt.expiration-minutes}") long accessExpirationMinutes,
+            @Value("${app.jwt.refresh-expiration-days}") long refreshExpirationDays
     ) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.issuer = issuer;
-        this.expirationMinutes = expirationMinutes;
+        this.accessExpirationMinutes = accessExpirationMinutes;
+        this.refreshExpirationDays = refreshExpirationDays;
 
         this.verifier = JWT.require(this.algorithm)
                 .withIssuer(this.issuer)
                 .build();
     }
 
-    public String gerarToken(String email) {
+    public String gerarAccessToken(String email) {
         Instant now = Instant.now();
-        Instant exp = now.plus(expirationMinutes, ChronoUnit.MINUTES);
+        Instant exp = now.plus(accessExpirationMinutes, ChronoUnit.MINUTES);
 
         return JWT.create()
                 .withIssuer(issuer)
-                .withSubject(email) // subject = email
+                .withSubject(email)
                 .withIssuedAt(Date.from(now))
                 .withExpiresAt(Date.from(exp))
+                .withClaim("type", "access")
+                .sign(algorithm);
+    }
+
+    public String gerarRefreshToken(String email) {
+        Instant now = Instant.now();
+        Instant exp = now.plus(refreshExpirationDays, ChronoUnit.DAYS);
+
+        return JWT.create()
+                .withIssuer(issuer)
+                .withSubject(email)
+                .withIssuedAt(Date.from(now))
+                .withExpiresAt(Date.from(exp))
+                .withClaim("type", "refresh")
                 .sign(algorithm);
     }
 
@@ -52,7 +69,12 @@ public class JwtService {
             DecodedJWT jwt = verifier.verify(token);
             return jwt.getSubject();
         } catch (JWTVerificationException e) {
-            return null; // inválido/expirado/issuer errado/assinatura errada
+            throw new RuntimeException("Token inválido ou expirado");
         }
+    }
+
+    public boolean isRefreshToken(String token) {
+        DecodedJWT jwt = verifier.verify(token);
+        return "refresh".equals(jwt.getClaim("type").asString());
     }
 }
